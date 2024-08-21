@@ -11,14 +11,18 @@ const movieSchema = mongoose.Schema(
     poster: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     publishingYear: {
-      type: String,
+      type: Number,
       required: true,
       min: 1900,
-      max: 2025,
-    }
+      max: 2024,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   {
     timestamps: true,

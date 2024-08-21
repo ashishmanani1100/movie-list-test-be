@@ -1,19 +1,13 @@
-const mongoose = require("mongoose");
-const app = require("./app");
+const mongoose = require('mongoose');
+const app = require('./app');
 const logger = require('./config/logger');
+const config = require('./config/config');
 
-require("dotenv").config();
+// connect to mongodb
+mongoose.connect(config.mongoose.url).then(() => {
+  logger.info('Connected to MongoDB');
 
-const PORT = process.env.PORT || 5000;
-const MONGODB_URL = process.env.MONGODB_URL;
-
-// console.log("port is ", PORT, "url is", MONGODB_URL);
-
-// user mongodb options here
-mongoose.connect(MONGODB_URL).then(() => {
-  logger.info("Connected to MongoDB");
-
-  server = app.listen(PORT, () => {
-    logger.info(`Listening to port ${PORT}`);
+  app.listen(config.port, () => {
+    logger.info(`Listening to port ${config.port}`);
   });
 });

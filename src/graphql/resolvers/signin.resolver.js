@@ -1,23 +1,23 @@
-const { authValidation } = require('./../../validations');
-const { validateArgs } = require('./../../services/validation.service');
 const { GraphQLError } = require('graphql');
-const { ApolloServerErrorCode } = require("@apollo/server/errors");
+const { authValidation } = require('../../validations');
+const { validationService, authService } = require('../../services');
 
 const signIn = async (_, args, { models: { User } }) => {
-  const { email, password } = await validateArgs(args, authValidation.signIn);
+  const { email, password } = await validationService.validateArgs(args, authValidation.signIn);
 
-  console.log("calling sign in resolver ", email, password);
+  // check whether user with email is exist or not
+  const user = await User.findOne({ email });
+  if (!user) throw new GraphQLError('User does not exist with given email');
 
-  const user = await User.findOne({ email: 'sean_bean@gameofthron.es' });
-  
-  console.log("user is ", user);
+  if (!(await user.isPasswordMatch(password))) throw new GraphQLError('Invalid password!');
 
+  // generate jwt access token
+  const accessToken = await authService.generateAccessToken(user._id);
 
-  
   return {
-    user: { email: "test@gmail.com" },
-    tokens: { accessToken: "abc" }
-  }
+    user: { email },
+    tokens: { accessToken },
+  };
 };
 
 module.exports = signIn;

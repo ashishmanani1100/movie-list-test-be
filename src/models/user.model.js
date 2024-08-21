@@ -33,6 +33,15 @@ const userSchema = mongoose.Schema(
   },
 );
 
+/**
+ * Check if email is already taken
+ * @param {string} email - User email
+ * @returns {Promise<boolean>}
+ */
+userSchema.statics.isEmailTaken = async function (email) {
+  const user = await this.findOne({ email });
+  return !!user;
+};
 
 /**
  * Check if password matches the user's password
@@ -40,9 +49,16 @@ const userSchema = mongoose.Schema(
  * @returns {Promise<boolean>}
  */
 userSchema.methods.isPasswordMatch = async function (password) {
-  const user = this;
-  return bcrypt.compare(password, user.password);
+  return bcrypt.compare(password, this.password);
 };
+
+userSchema.pre('save', async function (next) {
+  const user = this;
+  if (user.isModified('password')) {
+    user.password = await bcrypt.hash(user.password, 8);
+  }
+  next();
+});
 
 const User = mongoose.model('User', userSchema);
 

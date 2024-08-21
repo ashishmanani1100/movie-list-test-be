@@ -1,4 +1,7 @@
 const User = `
+  """
+  Details of user.
+  """
   type User {
     email: String
   }

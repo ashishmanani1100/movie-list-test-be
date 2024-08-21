@@ -2,10 +2,23 @@ const { ApolloServerErrorCode } = require('@apollo/server/errors');
 const { GraphQLError } = require('graphql');
 const logger = require('../config/logger');
 
+/**
+ * Catch all grpahql errors and convert it into standarized error format.
+ * @param {Error} formattedError - The error to format.
+ * @returns {Object} Standarized error response.
+ */
 const formatError = (formattedError) => {
   logger.error(formattedError);
-  console.log(formattedError.extensions?.code);
 
+  // apollo server errors
+  if (formattedError.extensions.code in ApolloServerErrorCode) {
+    return {
+      statusCode: 400,
+      message: formattedError.message,
+    };
+  }
+
+  // graphql errors
   if (formattedError instanceof GraphQLError) {
     // shield error
     if (formattedError.message === 'Not Authorised!') {
@@ -21,13 +34,7 @@ const formatError = (formattedError) => {
       message: formattedError.message,
     };
   }
-  if (formattedError.extensions.code in ApolloServerErrorCode) {
-    // apollo server error
-    return {
-      statusCode: 400,
-      message: formattedError.message,
-    };
-  }
+
   // other type of error
   return {
     statusCode: 500,
