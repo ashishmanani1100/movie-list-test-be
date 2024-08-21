@@ -4,6 +4,7 @@ const { ApolloServer } = require('apollo-server-express');
 const { expressMiddleware } = require('@apollo/server/express4');
 const { applyMiddleware } = require('graphql-middleware');
 const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer');
+const { ApolloServerPluginLandingPageGraphQLPlayground } = require('apollo-server-core');
 const formatError = require('./utils/formatError');
 const models = require('./models');
 const shield = require('./shield');
@@ -28,7 +29,7 @@ const server = new ApolloServer({
   schema: applyMiddleware(graphqlSchema, shield), // graphql shcema with shield authentication
   cache: 'bounded', // prevent memory overflow and ensure efficient caching
   formatError, // handle graphql errors
-  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })], // drain http server
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), ApolloServerPluginLandingPageGraphQLPlayground()], // drain http server and enable playground
   context: async ({ req, res }) => {
     return { req, res, models };
   },
